@@ -221,19 +221,22 @@ export default function ReportsPage() {
       if (response.ok) {
         const result = await response.json()
         // Add new report to list
+        const filename = result.filename
         const newReport: Report = {
-          id: result.filename.replace('.pdf', ''),
+          id: filename.replace('.pdf', ''),
           title: 'Nouveau Rapport',
           type: 'comprehensive',
           company_name: 'Nouvelle Entreprise',
           generated_at: new Date().toISOString(),
+          filename,
           file_size: result.size_bytes,
           status: 'ready',
           download_count: 0,
           shared: false,
           calculation_id: calculationId,
           total_co2e: 35000,
-          grade: 'B'
+          grade: 'B',
+          download_url: `/api/reports/file/${encodeURIComponent(filename)}`
         }
         
         setReports(prev => [newReport, ...prev])
