@@ -31,6 +31,7 @@ interface DashboardData {
     mediane: number
     percentile: number
     position: 'excellent' | 'bon' | 'moyen' | 'ameliorer'
+    votreSociete?: number
   }
   tendances: Array<{
     mois: string
@@ -218,7 +219,12 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-carbon-900 mb-4">
               Benchmark Sectoriel
             </h3>
-            <BenchmarkChart benchmark={data.benchmark} />
+            <BenchmarkChart 
+              data={{
+                ...data.benchmark,
+                votreSociete: data.benchmark.votreSociete ?? data.emissions.parEmploye
+              }} 
+            />
           </motion.div>
         </div>
 
