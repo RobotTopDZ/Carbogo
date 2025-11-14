@@ -1,6 +1,6 @@
 'use client'
 
-import { UseFormRegister, FieldErrors } from 'react-hook-form'
+import { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form'
 
 interface EntrepriseData {
   nom: string
@@ -13,6 +13,7 @@ interface EntrepriseData {
 interface EntrepriseStepProps {
   register: UseFormRegister<any>
   errors: FieldErrors<any>
+  watch?: UseFormWatch<any>
 }
 
 // Secteurs basés sur les catégories ADEME Base Carbone
@@ -50,6 +51,8 @@ const TAILLES_ENTREPRISE = [
 ]
 
 export function EntrepriseStep({ register, errors }: EntrepriseStepProps) {
+  const entrepriseErrors = errors.entreprise as FieldErrors<any> | undefined
+
   return (
     <div className="space-y-6">
       <div>
@@ -74,8 +77,8 @@ export function EntrepriseStep({ register, errors }: EntrepriseStepProps) {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
             placeholder="Nom de votre entreprise"
           />
-          {errors.entreprise?.nom && (
-            <p className="mt-1 text-sm text-red-600">{(errors.entreprise.nom as any)?.message || 'Erreur de validation'}</p>
+          {entrepriseErrors?.nom && (
+            <p className="mt-1 text-sm text-red-600">{(entrepriseErrors.nom as any)?.message || 'Erreur de validation'}</p>
           )}
         </div>
 
@@ -96,8 +99,8 @@ export function EntrepriseStep({ register, errors }: EntrepriseStepProps) {
               </option>
             ))}
           </select>
-          {errors.entreprise?.secteur && (
-            <p className="mt-1 text-sm text-red-600">{(errors.entreprise.secteur as any)?.message || 'Erreur de validation'}</p>
+          {entrepriseErrors?.secteur && (
+            <p className="mt-1 text-sm text-red-600">{(entrepriseErrors.secteur as any)?.message || 'Erreur de validation'}</p>
           )}
           <p className="mt-1 text-xs text-gray-500">
             Le secteur détermine les facteurs d'émission ADEME applicables
@@ -122,8 +125,8 @@ export function EntrepriseStep({ register, errors }: EntrepriseStepProps) {
               </option>
             ))}
           </select>
-          {errors.entreprise?.effectif && (
-            <p className="mt-1 text-sm text-red-600">{(errors.entreprise.effectif as any)?.message || 'Erreur de validation'}</p>
+          {entrepriseErrors?.effectif && (
+            <p className="mt-1 text-sm text-red-600">{(entrepriseErrors.effectif as any)?.message || 'Erreur de validation'}</p>
           )}
         </div>
 
@@ -140,8 +143,8 @@ export function EntrepriseStep({ register, errors }: EntrepriseStepProps) {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
             placeholder="ex: 1000000"
           />
-          {errors.entreprise?.chiffreAffaires && (
-            <p className="mt-1 text-sm text-red-600">{(errors.entreprise.chiffreAffaires as any)?.message || 'Erreur de validation'}</p>
+          {entrepriseErrors?.chiffreAffaires && (
+            <p className="mt-1 text-sm text-red-600">{(entrepriseErrors.chiffreAffaires as any)?.message || 'Erreur de validation'}</p>
           )}
           <p className="mt-1 text-xs text-gray-500">
             Optionnel - permet de calculer l'intensité carbone par euro de CA

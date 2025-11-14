@@ -1,10 +1,13 @@
 'use client'
 
-import { UseFormRegister, FieldErrors } from 'react-hook-form'
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from 'react-hook-form'
 
 interface AchatsStepProps {
   register: UseFormRegister<any>
   errors: FieldErrors<any>
+  watch?: UseFormWatch<any>
+  setValue?: UseFormSetValue<any>
+  getValues?: UseFormGetValues<any>
 }
 
 const CATEGORIES_ACHATS = [

@@ -239,13 +239,7 @@ export class ErrorHandler {
         break
       case ErrorType.NETWORK:
       case ErrorType.SERVER_ERROR:
-        toast.error(error.message, {
-          ...options,
-          action: {
-            label: 'Réessayer',
-            onClick: () => window.location.reload()
-          }
-        })
+        toast.error(`${error.message} • Réessayez plus tard.`, options)
         break
       case ErrorType.RATE_LIMIT:
         toast.error(error.message, { ...options, duration: 8000 })
