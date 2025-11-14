@@ -3,10 +3,12 @@
 import { motion } from 'framer-motion'
 import { AIQuestionnaireForm } from '../../components/questionnaire/AIQuestionnaireForm'
 import { SparklesIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import SimpleNav from '../../components/layout/SimpleNav'
 
 export default function QuestionnairePage() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <SimpleNav />
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4">

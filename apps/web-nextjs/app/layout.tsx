@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import { Providers } from './providers'
 import { Toaster } from 'react-hot-toast'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -22,10 +23,12 @@ export default function RootLayout({
   return (
     <html lang="fr" className={inter.variable}>
       <body className={`${inter.className} font-sans antialiased`}>
-        <Providers>
-          {children}
-          <Toaster position="top-right" />
-        </Providers>
+        <ErrorBoundary>
+          <Providers>
+            {children}
+            <Toaster position="top-right" />
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   )

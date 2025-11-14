@@ -11,8 +11,11 @@ interface CompanyInfo {
 }
 
 export async function POST(request: NextRequest) {
+  let requestData: CompanyInfo
+  
   try {
-    const { companyName, sector, employees, revenue, location }: CompanyInfo = await request.json()
+    requestData = await request.json()
+    const { companyName, sector, employees, revenue, location } = requestData
 
     // Create a detailed prompt for the AI to estimate carbon footprint data
     const prompt = `Tu es un expert en calcul d'empreinte carbone utilisant les données ADEME Base Carbone v17. 
@@ -61,51 +64,51 @@ Réponds UNIQUEMENT avec un objet JSON valide dans ce format exact:
   "justification": "Explication brève des estimations basées sur le secteur et la taille"
 }`
 
-    // First API call with reasoning
-    let response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "model": "minimax/minimax-m2",
-        "messages": [
-          {
-            "role": "system",
-            "content": "Tu es un expert en calcul d'empreinte carbone. Tu utilises les données ADEME et les moyennes sectorielles pour estimer les consommations d'entreprises. Réponds toujours avec un JSON valide."
-          },
-          {
-            "role": "user",
-            "content": prompt
-          }
-        ],
-        "reasoning": {"enabled": true},
-        "temperature": 0.3,
-        "max_tokens": 1000
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`API call failed: ${response.status}`)
-    }
-
-    const result = await response.json()
-    const aiResponse = result.choices[0].message
-
-    // Parse the JSON response from AI
+    // Try API call with reasoning, but use fallback if it fails
     let estimations
+    
     try {
-      // Extract JSON from the response content
-      const jsonMatch = aiResponse.content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        estimations = JSON.parse(jsonMatch[0])
+      let response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "model": "minimax/minimax-m2",
+          "messages": [
+            {
+              "role": "system",
+              "content": "Tu es un expert en calcul d'empreinte carbone. Tu utilises les données ADEME et les moyennes sectorielles pour estimer les consommations d'entreprises. Réponds toujours avec un JSON valide."
+            },
+            {
+              "role": "user",
+              "content": prompt
+            }
+          ],
+          "reasoning": {"enabled": true},
+          "temperature": 0.3,
+          "max_tokens": 1000
+        })
+      })
+
+      if (!response.ok) {
+        console.log(`API returned ${response.status}, using fallback`)
+        estimations = getFallbackEstimations(sector, employees)
       } else {
-        throw new Error('No JSON found in AI response')
+        const result = await response.json()
+        const aiResponse = result.choices[0].message
+
+        // Parse the JSON response from AI
+        const jsonMatch = aiResponse.content.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          estimations = JSON.parse(jsonMatch[0])
+        } else {
+          estimations = getFallbackEstimations(sector, employees)
+        }
       }
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError)
-      // Fallback estimations based on sector
+    } catch (apiError) {
+      console.log('API call failed, using fallback:', apiError)
       estimations = getFallbackEstimations(sector, employees)
     }
 
@@ -125,8 +128,7 @@ Réponds UNIQUEMENT avec un objet JSON valide dans ce format exact:
         montant_achats_annuel: Math.max(0, estimations.achats?.montant_achats_annuel || 0),
         pourcentage_local: Math.min(100, Math.max(0, estimations.achats?.pourcentage_local || 20))
       },
-      justification: estimations.justification || "Estimations basées sur les moyennes sectorielles ADEME",
-      reasoning: aiResponse.reasoning_details || null
+      justification: estimations.justification || "Estimations basées sur les moyennes sectorielles ADEME"
     }
 
     return NextResponse.json(sanitizedEstimations)
@@ -135,15 +137,15 @@ Réponds UNIQUEMENT avec un objet JSON valide dans ce format exact:
     console.error('AI autocomplete error:', error)
     
     // Return fallback estimations in case of error
-    const fallback = getFallbackEstimations(
-      (await request.json()).sector || 'services',
-      (await request.json()).employees || '10-49'
-    )
+    const sector = requestData?.sector || 'services'
+    const employees = requestData?.employees || '10-49'
+    
+    const fallback = getFallbackEstimations(sector, employees)
     
     return NextResponse.json({
       ...fallback,
-      justification: "Estimations par défaut (erreur IA)",
-      error: "AI service temporarily unavailable"
+      justification: "Estimations par défaut (service IA temporairement indisponible)",
+      error: null
     })
   }
 }

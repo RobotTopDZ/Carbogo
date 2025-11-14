@@ -18,6 +18,15 @@ interface ActionRecommendationsProps {
 }
 
 export function ActionRecommendations({ recommendations }: ActionRecommendationsProps) {
+  // Safety check: if recommendations is undefined or empty, provide message
+  if (!recommendations || !Array.isArray(recommendations) || recommendations.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucune recommandation disponible
+      </div>
+    )
+  }
+  
   const getPriorityColor = (priorite: number) => {
     if (priorite >= 8) return 'bg-red-100 text-red-800 border-red-200'
     if (priorite >= 6) return 'bg-amber-100 text-amber-800 border-amber-200'

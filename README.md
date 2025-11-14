@@ -1,319 +1,238 @@
-# CarbonScore - AI-Powered Carbon Footprint Platform
+# CarbonScore – AI-Powered Carbon Footprint Platform
 
-🌱 **Production-grade carbon footprinting platform for SMEs using ADEME Base Carbone v17 data, with Next.js frontend, Python microservices, ML models, and LLM-powered insights.**
+CarbonScore is a production-grade sustainability platform for SMEs. It combines deterministic ADEME Base Carbone v17 calculations with machine-learning insights, prescriptive action plans, and professional-grade reporting. The system is built with a Next.js frontend, Python FastAPI microservices, and a set of worker pipelines that cover analytics, PDF generation, and AI assistance.
 
 ![CarbonScore Platform](https://img.shields.io/badge/Version-1.0.0-green) ![License](https://img.shields.io/badge/License-MIT-blue) ![Python](https://img.shields.io/badge/Python-3.10+-blue) ![Next.js](https://img.shields.io/badge/Next.js-14+-black)
 
-## 🎯 Overview
+---
 
-CarbonScore is a comprehensive carbon footprinting platform that helps SMEs calculate, analyze, and reduce their carbon emissions. Built with modern technologies and deployed on Railway, it combines deterministic ADEME calculations with AI-powered insights and recommendations.
+## 1. Product Overview
 
-### Key Features
+### Purpose
+CarbonScore helps companies quantify their greenhouse-gas emissions, simulate reduction strategies, and publish stakeholder-ready reports. Every capability—from questionnaires to dashboards to PDF exports—is optimized for teams that need transparent audit trails and executive-level insights.
 
-- 🔢 **Deterministic Calculations**: ADEME Base Carbone v17 emission factors
-- 🤖 **ML-Powered Insights**: Anomaly detection, imputation, benchmarking
-- 📊 **AI Report Generation**: LLM-powered narrative reports in French
-- 💬 **Conversational Assistant**: RAG-based sustainability copilot
-- 📈 **Interactive Dashboard**: Real-time visualizations and benchmarks
-- 🎯 **Action Recommendations**: ML-ranked reduction strategies
-- 📄 **Professional Reports**: Branded PDF exports with charts
-- 🔐 **Enterprise Ready**: GDPR compliant, multi-tenant, secure
+### Value Proposition
+- Deterministic ADEME-compliant calculations powered by carefully curated Base Carbone v17 factors.
+- AI-assisted narratives and benchmarking so sustainability officers can focus on decisions rather than spreadsheets.
+- Ready-to-deploy Railway setup that prioritizes serving the frontend as the public entry point while backend services remain secured.
 
-## 🏗️ Architecture
+### Key Capabilities
+1. Carbon accounting wizard with validation rules and data enrichment.
+2. Multi-scope dashboard (Scopes 1/2/3) with benchmarking, insights, and recommended actions.
+3. Report library storing generated PDF files with company metadata and download history.
+4. Worker pipelines for ML models, LLM orchestration, and scheduled calculations.
+5. Modular API surface that can be embedded into partner workflows.
+
+---
+
+## 2. Architecture Summary
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Next.js       │    │   FastAPI       │    │   PostgreSQL    │
-│   Frontend      │◄──►│   Services      │◄──►│   + pgvector    │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │              ┌─────────────────┐              │
-         │              │   ML & LLM      │              │
-         └──────────────►│   Pipeline      │◄─────────────┘
-                        │                 │
-                        └─────────────────┘
+┌─────────────────────────────┐
+│        Next.js Frontend     │
+│  (apps/web-nextjs)          │
+│  - Dashboard & reports      │
+│  - Questionnaire            │
+│  - Admin & docs             │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│ Python FastAPI Services     │
+│  - Calc Service (ADEME)     │
+│  - ML Service               │
+│  - PDF Service              │
+│  - LLM Service              │
+│  - Worker Service           │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│  PostgreSQL + pgvector DB   │
+│  Redis cache                │
+│  Object storage for reports │
+└─────────────────────────────┘
 ```
 
-### Services
+Core services:
+- **Front-end (Next.js 14, TypeScript, TailwindCSS, React Query)** – user experience, dashboards, reports.
+- **calc-service** – deterministic carbon accounting, ADEME mapping, validation.
+- **ml-service** – anomaly detection, benchmarking, intensity forecasting.
+- **pdf-service** – ReportLab-based generator for branded PDF reports and library index.
+- **llm-service** – RAG pipeline powering explanations, insights, and actions.
+- **worker-service** – background jobs, ingestion, scheduled report refresh.
 
-- **Frontend**: Next.js with TypeScript, TailwindCSS, React Query
-- **Calc Service**: ADEME factor mapping and deterministic calculations
-- **ML Service**: Anomaly detection, imputation, benchmarking models
-- **PDF Service**: ReportLab-based report generation with charts
-- **LLM Service**: RAG pipeline for AI insights and conversational assistant
-- **Worker Service**: Background jobs, training, and batch processing
+For deeper component diagrams and API flows, see `DOCUMENTATION.md`.
 
-## 🚀 Quick Start
+---
 
-### Prerequisites
+## 3. Technology Stack
 
-- Docker & Docker Compose
-- Node.js 18+ (for local development)
-- Python 3.10+ (for local development)
-- Git
+| Layer          | Technologies                                                                                                   |
+|---------------|------------------------------------------------------------------------------------------------------------------|
+| Frontend       | Next.js 14, TypeScript, React 18, TailwindCSS, Framer Motion, Heroicons, React Hook Form                       |
+| Backend        | Python 3.10, FastAPI, Pydantic, Uvicorn, Celery-style workers                                                   |
+| Data & Storage | PostgreSQL + pgvector, Redis 7, MLflow (optional), object storage for generated PDFs                            |
+| Data Science   | scikit-learn, pandas, numpy, seaborn, matplotlib                                                                |
+| DevOps         | Docker, Docker Compose, Railway, GitHub Actions (optional), linting via Next/ESLint and mypy/pytest on services |
 
-### 1. Clone the Repository
+---
 
+## 4. Getting Started
+
+### 4.1 Prerequisites
+- Docker and Docker Compose
+- Node.js 18+ and npm
+- Python 3.10+
+- Git CLI
+
+### 4.2 Repository Clone
 ```bash
-git clone https://github.com/your-org/carbogo.git
-cd carbogo
+git clone https://github.com/RobotTopDZ/Carbogo.git
+cd Carbogo
 ```
 
-### 2. Environment Setup
-
+### 4.3 Environment Configuration
 ```bash
-# Copy environment template
 cp .env.example .env
-
-# Edit .env with your configuration
-# At minimum, set your LLM API keys:
-# OPENAI_API_KEY=sk-your-key-here
-# GROK_API_KEY=gsk-your-key-here
+# Edit .env and populate API keys, database credentials, and Railway-specific variables.
 ```
 
-### 3. Start Development Environment
-
+### 4.4 Service Startup
 ```bash
-# Start all services
 docker-compose up -d
-
-# Check service health
 docker-compose ps
-
-# View logs
 docker-compose logs -f
 ```
 
-### 4. Initialize Database
-
+### 4.5 Database Initialization
 ```bash
-# Run migrations
 docker-compose exec calc-service python -m alembic upgrade head
-
-# Load ADEME data
 docker-compose exec calc-service python scripts/load_ademe_data.py
-
-# Create sample data (optional)
 docker-compose exec calc-service python scripts/create_sample_data.py
 ```
 
-### 5. Access the Application
+### 4.6 Local Endpoints
+- Frontend: `http://localhost:3000`
+- API (calc-service): `http://localhost:8000`
+- MLflow UI: `http://localhost:5000`
+- Admin dashboard: `http://localhost:3000/admin`
 
-- **Frontend**: http://localhost:3000
-- **API Documentation**: http://localhost:8000/docs
-- **MLflow UI**: http://localhost:5000
-- **Admin Panel**: http://localhost:3000/admin
+---
 
-## 📁 Project Structure
+## 5. Railway Deployment (Frontend-first)
+
+1. Push the repository to GitHub or another Git provider.
+2. In Railway, create a service and set the **Root Directory** to `apps/web-nextjs`.
+3. Choose the Dockerfile builder; `apps/web-nextjs/Dockerfile` already produces a standalone Next.js server.
+4. Configure environment variables:
+   - `NODE_ENV=production`
+   - `NEXT_PUBLIC_API_URL=https://<backend-host>`
+   - `PDF_SERVICE_URL=https://<pdf-service-host>` (optional override)
+5. Deploy. Railway exposes port 3000 internally and serves the Next.js application on the generated public URL.
+
+Backend services (calc, ML, PDF, LLM, worker) can be deployed through separate Railway services, containers, or any preferred infrastructure. Ensure the `NEXT_PUBLIC_API_URL` points to the API gateway that fronts those services.
+
+---
+
+## 6. Project Structure
 
 ```
 carbogo/
 ├── apps/
-│   └── web-nextjs/              # Next.js frontend application
+│   └── web-nextjs/         # Next.js frontend
 ├── services/
-│   ├── calc-service/            # Calculation microservice
-│   ├── ml-service/              # ML inference & training
-│   ├── pdf-service/             # Report generation
-│   ├── llm-service/             # LLM orchestration
-│   └── worker-service/          # Background tasks
-├── libs/
-│   ├── shared-types/            # Shared TypeScript/Python types
-│   ├── database/                # Database models & migrations
-│   └── utils/                   # Common utilities
-├── data/
-│   └── basecarbone-v17-fr.csv   # ADEME emission factors
-├── ml/
-│   ├── experiments/             # Jupyter notebooks
-│   ├── pipelines/               # Training pipelines
-│   └── models/                  # Model artifacts
-├── infra/
-│   ├── docker-compose.yml       # Local development
-│   └── railway.json             # Railway configuration
-└── tests/
-    ├── unit/
-    ├── integration/
-    └── e2e/
+│   ├── calc-service/       # FastAPI calculations
+│   ├── ml-service/         # ML training/inference
+│   ├── pdf-service/        # PDF generation pipeline
+│   ├── llm-service/        # LLM orchestration
+│   └── worker-service/     # Background workers
+├── data/                   # Static ADEME datasets
+├── scripts/                # Utility scripts
+├── docker-compose.yml
+└── DOCUMENTATION.md        # Extended technical reference
 ```
 
-## 🔧 Development
+---
 
-### Local Development Setup
+## 7. Development Workflow
 
+### 7.1 Frontend
 ```bash
-# Install frontend dependencies
 cd apps/web-nextjs
 npm install
 npm run dev
+```
 
-# Install Python service dependencies
+### 7.2 Backend Services
+```bash
 cd services/calc-service
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### Running Tests
-
+### 7.3 Testing
 ```bash
-# Frontend tests
-cd apps/web-nextjs
-npm test
+# Frontend
+cd apps/web-nextjs && npm test
 
-# Backend tests
-cd services/calc-service
-pytest
+# Backend
+cd services/calc-service && pytest
 
-# Integration tests
+# Integration
 docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ```
 
-### Database Migrations
-
+### 7.4 Database Migrations
 ```bash
-# Create new migration
 docker-compose exec calc-service alembic revision --autogenerate -m "description"
-
-# Apply migrations
 docker-compose exec calc-service alembic upgrade head
-
-# Rollback migration
 docker-compose exec calc-service alembic downgrade -1
 ```
 
-## 🤖 ML Pipeline
+---
 
-### Model Training
+## 8. Operations and Monitoring
 
-```bash
-# Train anomaly detection model
-docker-compose exec ml-service python -m app.training.anomaly_detection
+- Health checks:  
+  `http://localhost:3000/api/health` (frontend)  
+  `http://localhost:8000/health` (calc)  
+  `http://localhost:8010/health` (ML)  
+  `http://localhost:8020/health` (PDF)  
+  `http://localhost:8030/health` (LLM)
 
-# Train imputation models
-docker-compose exec ml-service python -m app.training.imputation
+- Logging: all services emit structured JSON to stdout for container aggregation.
+- Metrics: each FastAPI service exposes Prometheus-compatible metrics on `/metrics`.
+- Error tracking: integrate Sentry by setting `SENTRY_DSN` and enabling the middleware in each service.
 
-# Train benchmark model
-docker-compose exec ml-service python -m app.training.benchmarking
-```
-
-### Model Deployment
-
-Models are automatically versioned using MLflow and deployed via the ML service API endpoints.
-
-## 🚀 Deployment
-
-### Railway Deployment
-
-1. **Connect Repository**: Link your GitHub repository to Railway
-2. **Set Environment Variables**: Configure all required environment variables in Railway dashboard
-3. **Deploy Services**: Railway will automatically deploy each service based on `railway.json` configuration
-
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and link project
-railway login
-railway link
-
-# Deploy specific service
-railway up --service calc-service
-
-# Check deployment status
-railway status
-```
-
-### Environment Variables for Production
-
-Key environment variables to set in Railway:
-
-```env
-DATABASE_URL=postgresql://...  # Railway Postgres URL
-OPENAI_API_KEY=sk-...
-GROK_API_KEY=gsk-...
-NEXTAUTH_SECRET=...
-JWT_SECRET=...
-SENTRY_DSN=...
-```
-
-## 📊 Monitoring
-
-### Health Checks
-
-- **Frontend**: http://localhost:3000/api/health
-- **Calc Service**: http://localhost:8000/health
-- **ML Service**: http://localhost:8010/health
-- **PDF Service**: http://localhost:8020/health
-- **LLM Service**: http://localhost:8030/health
-
-### Metrics & Logging
-
-- **Application Logs**: Structured JSON logging to stdout
-- **Metrics**: Prometheus-compatible metrics at `/metrics` endpoints
-- **Error Tracking**: Sentry integration for error monitoring
-- **Performance**: Built-in performance monitoring and alerting
-
-## 🔐 Security
-
-### Authentication & Authorization
-
-- JWT-based authentication with refresh tokens
-- Role-based access control (RBAC)
-- Multi-factor authentication support
-- OAuth integration (Google, Microsoft)
-
-### Data Protection
-
-- Encryption in transit (TLS) and at rest (AES-256)
-- GDPR compliance with data retention policies
-- Audit logging for all user actions
-- Input validation and sanitization
-
-## 📖 API Documentation
-
-### Core Endpoints
-
-- **POST** `/api/v1/calculate` - Run carbon calculation
-- **GET** `/api/v1/factors` - ADEME factor lookup
-- **POST** `/api/v1/ml/anomaly` - Detect input anomalies
-- **POST** `/api/v1/llm/report` - Generate AI report
-- **POST** `/api/v1/pdf/generate` - Create PDF report
-
-Full API documentation available at `/docs` when running the services.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript/Python coding standards
-- Write tests for new features
-- Update documentation for API changes
-- Ensure Docker builds pass
-- Test Railway deployment before merging
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Documentation**: [docs.carbonscore.com](https://docs.carbonscore.com)
-- **Issues**: [GitHub Issues](https://github.com/your-org/carbogo/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/carbogo/discussions)
-- **Email**: support@carbonscore.com
-
-## 🙏 Acknowledgments
-
-- **ADEME** for providing the Base Carbone emission factors
-- **Railway** for the deployment platform
-- **OpenAI/Anthropic** for LLM capabilities
-- **Open Source Community** for the amazing tools and libraries
+Security checklist:
+- JWT-based authentication with refresh tokens.
+- Role-based access control for admin routes.
+- TLS termination via the ingress layer (Railway, Nginx, or reverse proxy of choice).
+- Regular dependency scanning via GitHub Advanced Security or other tooling.
 
 ---
 
-**Built with for a sustainable future**
+## 9. Documentation
+
+Comprehensive architecture notes, API descriptions, runbooks, and troubleshooting tips live in [`DOCUMENTATION.md`](DOCUMENTATION.md). That file consolidates information for engineers, SREs, sustainability analysts, and sales engineers.
+
+---
+
+## 10. Licensing and Support
+
+- License: MIT – see the [LICENSE](LICENSE) file.
+- Issues: open a ticket on GitHub.
+- Discussions & roadmap: create a GitHub Discussion or contact the maintainers at support@carbonscore.com.
+
+---
+
+## 11. Contributing
+
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/my-change`).
+3. Commit with a descriptive message.
+4. Open a pull request and link related issues.
+5. Ensure linting, tests, and Docker builds succeed before requesting review.
+
+Thank you for helping CarbonScore deliver actionable sustainability insights. For detailed workflows, refer to `DOCUMENTATION.md`.

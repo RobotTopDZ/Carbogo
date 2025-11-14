@@ -15,22 +15,31 @@ interface BenchmarkChartProps {
 }
 
 export function BenchmarkChart({ data }: BenchmarkChartProps) {
+  // Safety check: if data is undefined, provide defaults
+  if (!data) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucune donnée disponible
+      </div>
+    )
+  }
+  
   const chartData = [
     {
       name: 'Quartile inférieur',
-      value: data.mediane * 0.6,
+      value: (data.mediane || 0) * 0.6,
       color: '#22c55e',
       label: 'Excellent'
     },
     {
       name: 'Médiane sectorielle',
-      value: data.mediane,
+      value: data.mediane || 0,
       color: '#f59e0b',
       label: 'Moyen'
     },
     {
       name: 'Quartile supérieur',
-      value: data.mediane * 1.4,
+      value: (data.mediane || 0) * 1.4,
       color: '#ef4444',
       label: 'À améliorer'
     }
@@ -79,7 +88,7 @@ export function BenchmarkChart({ data }: BenchmarkChartProps) {
           Benchmark Sectoriel
         </h3>
         <p className="text-gray-600">
-          Comparaison avec le secteur {data.secteur}
+          Comparaison avec le secteur {data.secteur || 'N/A'}
         </p>
       </div>
 
@@ -87,7 +96,7 @@ export function BenchmarkChart({ data }: BenchmarkChartProps) {
         <div className="flex items-center justify-between mb-4">
           <div>
             <div className="text-3xl font-bold text-gray-900">
-              {data.votreSociete.toFixed(1)} tCO₂e
+              {(data.votreSociete || 0).toFixed(1)} tCO₂e
             </div>
             <div className="text-sm text-gray-600">par employé</div>
           </div>
@@ -95,14 +104,14 @@ export function BenchmarkChart({ data }: BenchmarkChartProps) {
             <div 
               className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
               style={{ 
-                backgroundColor: getPositionColor(data.position) + '20',
-                color: getPositionColor(data.position)
+                backgroundColor: getPositionColor(data.position || 'moyen') + '20',
+                color: getPositionColor(data.position || 'moyen')
               }}
             >
-              {getPositionText(data.position)}
+              {getPositionText(data.position || 'moyen')}
             </div>
             <div className="text-sm text-gray-600 mt-1">
-              {data.percentile}e percentile
+              {data.percentile || 50}e percentile
             </div>
           </div>
         </div>
@@ -130,8 +139,8 @@ export function BenchmarkChart({ data }: BenchmarkChartProps) {
               radius={[4, 4, 0, 0]}
             />
             <ReferenceLine 
-              y={data.votreSociete} 
-              stroke={getPositionColor(data.position)}
+              y={data.votreSociete || 0} 
+              stroke={getPositionColor(data.position || 'moyen')}
               strokeWidth={3}
               strokeDasharray="5 5"
               label={{ 
@@ -146,19 +155,19 @@ export function BenchmarkChart({ data }: BenchmarkChartProps) {
       <div className="mt-6 grid grid-cols-3 gap-4 text-center">
         <div>
           <div className="text-lg font-semibold text-green-600">
-            {(data.mediane * 0.6).toFixed(1)}
+            {((data.mediane || 0) * 0.6).toFixed(1)}
           </div>
           <div className="text-sm text-gray-600">Leaders</div>
         </div>
         <div>
           <div className="text-lg font-semibold text-amber-600">
-            {data.mediane.toFixed(1)}
+            {(data.mediane || 0).toFixed(1)}
           </div>
           <div className="text-sm text-gray-600">Médiane</div>
         </div>
         <div>
           <div className="text-lg font-semibold text-red-600">
-            {(data.mediane * 1.4).toFixed(1)}
+            {((data.mediane || 0) * 1.4).toFixed(1)}
           </div>
           <div className="text-sm text-gray-600">À améliorer</div>
         </div>

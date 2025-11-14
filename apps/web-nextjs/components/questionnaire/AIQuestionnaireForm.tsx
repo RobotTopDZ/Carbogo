@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import { SparklesIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 
 interface SimplifiedQuestionnaireData {
   // Step 1: Company Info (Essential)
@@ -65,9 +66,16 @@ export function AIQuestionnaireForm() {
   // AI Auto-completion function using Minimax API
   const autoCompleteWithAI = async () => {
     setIsAIProcessing(true)
+    toast.loading('L\'IA analyse votre entreprise...', { id: 'ai-loading' })
     
     try {
       const companyInfo = getValues('entreprise')
+      
+      if (!companyInfo.nom || !companyInfo.secteur || !companyInfo.effectif) {
+        toast.error('Veuillez remplir les informations de l\'entreprise d\'abord', { id: 'ai-loading' })
+        setIsAIProcessing(false)
+        return
+      }
       
       const response = await fetch('/api/ai-autocomplete', {
         method: 'POST',
@@ -82,6 +90,10 @@ export function AIQuestionnaireForm() {
           location: companyInfo.localisation
         })
       })
+
+      if (!response.ok) {
+        throw new Error('Erreur API')
+      }
 
       const suggestions = await response.json()
       setAiSuggestions(suggestions)
@@ -104,17 +116,29 @@ export function AIQuestionnaireForm() {
         setValue('achats.pourcentage_local', suggestions.achats.pourcentage_local)
       }
       
+      // Show appropriate message based on whether AI or fallback was used
+      if (suggestions.error) {
+        toast.success('✅ Formulaire complété avec des estimations sectorielles !', { id: 'ai-loading' })
+      } else {
+        toast.success('✨ Formulaire complété avec l\'IA !', { id: 'ai-loading' })
+      }
+      
     } catch (error) {
       console.error('AI autocomplete error:', error)
+      toast.error('Erreur lors de l\'auto-complétion. Veuillez réessayer.', { id: 'ai-loading' })
     } finally {
       setIsAIProcessing(false)
     }
   }
 
   const onSubmit = async (data: SimplifiedQuestionnaireData) => {
-    console.log('Questionnaire data:', data)
+    console.log('📊 Submitting questionnaire data:', data)
+    
+    const loadingToast = toast.loading('Calcul de votre empreinte carbone en cours...')
     
     try {
+      console.log('🌐 Sending request to calculation service...')
+      
       // Send to calculation API
       const response = await fetch('http://localhost:8001/api/v1/calculate', {
         method: 'POST',
@@ -124,21 +148,33 @@ export function AIQuestionnaireForm() {
         body: JSON.stringify(data)
       })
 
+      console.log('📡 Response status:', response.status)
+
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('API Error Response:', errorText)
-        throw new Error(`Calculation failed: ${response.status} - ${errorText}`)
+        console.error('❌ API Error Response:', errorText)
+        throw new Error(`Calculation failed: ${response.status}`)
       }
 
       const result = await response.json()
-      console.log('Calculation result:', result)
+      console.log('✅ Calculation result:', result)
+      
+      // Store calculation ID in localStorage for dashboard
+      if (result.calculation_id) {
+        localStorage.setItem('lastCalculationId', result.calculation_id)
+      }
+      
+      toast.success('✅ Calcul terminé !', { id: loadingToast })
       
       // Redirect to results page
-      window.location.href = `/resultats/${result.calculation_id}`
+      console.log('🔄 Redirecting to:', `/resultats/${result.calculation_id}`)
+      setTimeout(() => {
+        window.location.href = `/resultats/${result.calculation_id}`
+      }, 500)
       
     } catch (error) {
-      console.error('Calculation error:', error)
-      alert('Erreur lors du calcul. Veuillez réessayer.')
+      console.error('❌ Calculation error:', error)
+      toast.error('❌ Erreur lors du calcul. Vérifiez la console pour plus de détails.', { id: loadingToast, duration: 5000 })
     }
   }
 

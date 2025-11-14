@@ -8,7 +8,7 @@ interface MetricCardProps {
   unit?: string
   change?: number
   changeLabel?: string
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: React.ComponentType<{ className?: string }> | string
   color?: 'green' | 'blue' | 'purple' | 'orange' | 'red'
   description?: string
 }
@@ -76,7 +76,13 @@ export function MetricCard({
         <div className="flex items-center gap-3">
           {Icon && (
             <div className={`p-2 ${classes.bg} rounded-lg`}>
-              <Icon className={`w-5 h-5 ${classes.icon}`} />
+              {typeof Icon === 'string' ? (
+                <span className="text-2xl" role="img" aria-label={title}>
+                  {Icon}
+                </span>
+              ) : (
+                <Icon className={`w-5 h-5 ${classes.icon}`} />
+              )}
             </div>
           )}
           <h3 className="text-sm font-medium text-gray-600">{title}</h3>

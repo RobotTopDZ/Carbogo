@@ -23,6 +23,15 @@ interface InsightsPanelProps {
 }
 
 export function InsightsPanel({ insights }: InsightsPanelProps) {
+  // Safety check: if insights is undefined or empty, provide message
+  if (!insights || !Array.isArray(insights) || insights.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucun insight disponible
+      </div>
+    )
+  }
+  
   const getInsightConfig = (type: string) => {
     switch (type) {
       case 'success':

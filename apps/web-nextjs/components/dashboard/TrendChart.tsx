@@ -13,6 +13,15 @@ interface TrendChartProps {
 }
 
 export function TrendChart({ data }: TrendChartProps) {
+  // Safety check: if data is undefined or empty, provide message
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucune donnée de tendance disponible
+      </div>
+    )
+  }
+  
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (

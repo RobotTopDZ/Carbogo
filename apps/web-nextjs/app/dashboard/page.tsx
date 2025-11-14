@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import {
+  GlobeAltIcon,
+  UserIcon,
+  CurrencyEuroIcon,
+  PresentationChartBarIcon
+} from '@heroicons/react/24/outline'
+import SimpleNav from '../../components/layout/SimpleNav'
 import { EmissionChart } from '../../components/dashboard/EmissionChart'
 import { BenchmarkChart } from '../../components/dashboard/BenchmarkChart'
 import { TrendChart } from '../../components/dashboard/TrendChart'
@@ -57,14 +64,30 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(`/api/v1/dashboard?period=${selectedPeriod}`)
+        // Check for calculation ID in localStorage or URL
+        const calculationId = localStorage.getItem('lastCalculationId') || new URLSearchParams(window.location.search).get('calculationId')
+        
+        let url = `/api/dashboard?period=${selectedPeriod}`
+        if (calculationId) {
+          url += `&calculationId=${calculationId}`
+        }
+        
+        const response = await fetch(url)
         if (!response.ok) {
           throw new Error('Erreur lors du chargement des données')
         }
         const dashboardData = await response.json()
-        setData(dashboardData)
+        
+        // Check if we have valid emissions data
+        if (dashboardData.emissions && dashboardData.emissions.total > 0) {
+          setData(dashboardData)
+        } else {
+          // No valid data
+          setData(null)
+        }
       } catch (error) {
         console.error('Erreur:', error)
+        setData(null)
       } finally {
         setLoading(false)
       }
@@ -102,6 +125,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SimpleNav />
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
@@ -138,29 +162,37 @@ export default function DashboardPage() {
             title="Émissions Totales"
             value={data.emissions.total}
             unit="tCO2e"
-            trend={-5.2}
-            icon="🌍"
+            change={-5.2}
+            changeLabel="vs mois précédent"
+            icon={GlobeAltIcon}
+            color="green"
           />
           <MetricCard
             title="Par Employé"
             value={data.emissions.parEmploye}
             unit="tCO2e/employé"
-            trend={-3.1}
-            icon="👤"
+            change={-3.1}
+            changeLabel="vs mois précédent"
+            icon={UserIcon}
+            color="blue"
           />
           <MetricCard
             title="Intensité Carbone"
             value={data.emissions.parChiffreAffaires}
             unit="kgCO2e/k€"
-            trend={-7.8}
-            icon="💰"
+            change={-7.8}
+            changeLabel="vs mois précédent"
+            icon={CurrencyEuroIcon}
+            color="purple"
           />
           <MetricCard
             title="Percentile Secteur"
             value={data.benchmark.percentile}
             unit="ème"
-            trend={12}
-            icon="📊"
+            change={12}
+            changeLabel="position"
+            icon={PresentationChartBarIcon}
+            color="orange"
           />
         </div>
 
@@ -174,7 +206,7 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-carbon-900 mb-4">
               Répartition par Scope
             </h3>
-            <ScopeBreakdown emissions={data.emissions} />
+            <ScopeBreakdown data={data.emissions} />
           </motion.div>
 
           <motion.div

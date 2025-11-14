@@ -13,7 +13,24 @@ interface ScopeBreakdownProps {
 }
 
 export function ScopeBreakdown({ data }: ScopeBreakdownProps) {
-  const total = data.scope1 + data.scope2 + data.scope3
+  // Safety check: if data is undefined, provide defaults
+  if (!data) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucune donnée disponible
+      </div>
+    )
+  }
+  
+  const total = (data.scope1 || 0) + (data.scope2 || 0) + (data.scope3 || 0)
+  
+  if (total === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucune émission enregistrée
+      </div>
+    )
+  }
 
   const chartData = [
     {
