@@ -1,0 +1,14 @@
+{
+  "name": "carbogo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "npm install --prefix apps/web-nextjs",
+    "build": "npm run build --prefix apps/web-nextjs",
+    "start": "npm run start --prefix apps/web-nextjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
